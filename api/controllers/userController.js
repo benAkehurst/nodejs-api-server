@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const bcrypt = require('bcryptjs');
 
+/**
+ * This function gets all the users in the Database
+ */
 exports.get_all_users = (req, res) => {
   User.find({}, (err, users) => {
     if (err) {
@@ -20,6 +23,9 @@ exports.get_all_users = (req, res) => {
   });
 };
 
+/**
+ * Creates a new user in the DB
+ */
 exports.create_a_user = (req, res) => {
   var newUser = new User({
     name: req.body.name,
@@ -42,6 +48,9 @@ exports.create_a_user = (req, res) => {
   });
 };
 
+/**
+ * Gets a single user using the user ID sent as a url parameter
+ */
 exports.get_single_user = (req, res) => {
   User.findById(req.params.userId, (err, user) => {
     if (err) {
@@ -59,6 +68,9 @@ exports.get_single_user = (req, res) => {
   });
 };
 
+/**
+ * Updates a user. Finds them via the user ID in the url parameter
+ */
 exports.update_a_user = (req, res) => {
   User.findByIdAndUpdate({
       _id: req.params.userId
@@ -82,6 +94,11 @@ exports.update_a_user = (req, res) => {
     });
 };
 
+/**
+ * Deletes the user from the db
+ * TODO: Change method to status 'deleted in db'
+ * TODO: Then if they really want to delete have admin do it?
+ */
 exports.delete_a_user = (req, res) => {
   User.remove({
       _id: req.params.userId
