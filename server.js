@@ -29,8 +29,10 @@ app.use(function (req, res, next) {
 app.use(cors());
 
 const userRoutes = require('./api/routes/userRoutes');
+const authRoutes = require('./api/routes/authRoutes');
 const todoRoutes = require('./api/routes/todoListRoutes');
 userRoutes(app);
+authRoutes(app);
 todoRoutes(app);
 
 app.use((req, res) => {
