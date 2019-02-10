@@ -1,4 +1,4 @@
-# TODO List API
+# Nodejs API Server
 
 ## This repo can be cloned and used as a base project of a Node.js API server
 
