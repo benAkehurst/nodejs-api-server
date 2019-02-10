@@ -10,8 +10,12 @@ exports.list_all_tasks = (req, res) => {
         message: 'No tasks fround',
         code: 204
       });
-      res.send(tasks);
-    };
+    }
+    res.send({
+      message: 'All tasks returned',
+      data: tasks,
+      code: 200
+    });
   });
 };
 
@@ -24,8 +28,12 @@ exports.create_a_task = (req, res) => {
         message: 'Couldn\'t create new task',
         code: 400
       });
-      res.json(task);
-    };
+    }
+    res.send({
+      message: 'Task created',
+      data: task,
+      code: 201
+    });
   });
 };
 
@@ -37,8 +45,12 @@ exports.read_a_task = (req, res) => {
         message: 'Couldn\'t find task',
         code: 400
       });
-    res.json(task);
     }
+    res.send({
+      message: 'Task found',
+      data: task,
+      code: 200
+    });
   });
 };
 
@@ -54,8 +66,12 @@ exports.update_a_task = (req, res) => {
             message: 'Couldn\'t update task',
             code: 400
         });
-      res.json(task);
       };
+      res.send({
+        message: 'Task updated successfully',
+        data: task,
+        code: 200
+      });
     });
 };
 
@@ -71,6 +87,10 @@ exports.delete_a_task = (req, res) => {
         code: 400
       });
     }
-    res.json({ message: 'Task deleted successfully'});
+    res.send({
+      message: 'Task deleted successfully',
+      data: task,
+      code: 200
+    });
   });
 }
