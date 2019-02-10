@@ -15,6 +15,7 @@ mongoose.connect(
   () => { console.log('Connected to Database')}
 );
 
+require('dotenv').config();
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
