@@ -1,4 +1,5 @@
 const express = require('express');
+const http = require('http');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -6,7 +7,6 @@ const cors = require('cors');
 const Task = require('./api/models/todoListModel');
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 mongoose.Promise = global.Promise;
 mongoose.connect(
@@ -35,5 +35,7 @@ app.use((req, res) => {
 })
 
 
-app.listen(port);
-console.log('API server started on port: ' + port);
+const port = process.env.PORT || '3000';
+app.set('port', port);
+const server = http.createServer(app);
+server.listen(port, () => console.log(`API running on localhost:${port}`));
