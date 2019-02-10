@@ -29,6 +29,19 @@ exports.create_a_task = (req, res) => {
   });
 };
 
+exports.read_a_task = (req, res) => {
+  Task.findById(req.params.taskId, (err, task) => {
+    if (err) {
+      res.send({
+        error: err,
+        message: 'Couldn\'t find task',
+        code: 400
+      });
+    res.json(task);
+    }
+  });
+};
+
 exports.update_a_task = (req, res) => {
   Task.findByIdAndUpdate(
     { _id: req.params.taskId },
