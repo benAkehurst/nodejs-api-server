@@ -40,13 +40,51 @@ exports.create_a_user = (req, res) => {
         code: 400
       });
     }
-    res.send({
+    res.status(201).json({
       message: 'User created',
-      data: user,
-      code: 201
+      success: true,
+      obj: user
     });
   });
 };
+
+exports.login_a_user = (req, res) => {
+  var data = req.body;
+  User.findOne({
+    email: data.email
+  }, function (err, user) {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        title: 'An error occurred',
+        error: err
+      });
+    }
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        title: 'Login failed',
+        error: {
+          message: 'Invalid login credentials'
+        }
+      });
+    }
+    if (!bcrypt.compareSync(data.password, user.password)) {
+      return res.status(401).json({
+        success: false,
+        title: 'Login failed',
+        error: {
+          message: 'Invalid login credentials'
+        }
+      });
+    }
+    res.status(200).json({
+      message: 'Successfully logged in',
+      success: true,
+      obj: user
+    });
+  });
+}
 
 /**
  * Gets a single user using the user ID sent as a url parameter
