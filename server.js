@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const Task = require('./api/models/todoListModel');
+const User = require('./api/models/userModel');
 
 const app = express();
 
@@ -27,8 +28,10 @@ app.use(function (req, res, next) {
 });
 app.use(cors());
 
-const routes = require('./api/routes/todoListRoutes');
-routes(app);
+const userRoutes = require('./api/routes/userRoutes');
+const todoRoutes = require('./api/routes/todoListRoutes');
+userRoutes(app);
+todoRoutes(app);
 
 app.use((req, res) => {
   res.status(404).send({url: req.originalUrl + ' not found'});
