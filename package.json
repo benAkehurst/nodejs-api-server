@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/benAkehurst/todoListAPI.git"
+    "url": "git+https://github.com/benAkehurst/nodejs-api-server.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/benAkehurst/todoListAPI/issues"
+    "url": "https://github.com/benAkehurst/nodejs-api-server/issues"
   },
-  "homepage": "https://github.com/benAkehurst/todoListAPI#readme",
+  "homepage": "https://github.com/benAkehurst/nodejs-api-server#readme",
   "devDependencies": {
     "nodemon": "^1.18.10"
   },
