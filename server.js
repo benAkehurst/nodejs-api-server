@@ -9,9 +9,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 mongoose.Promise = global.Promise;
-mongoose.connect("mongodb://localhost:27017/TodoAPI_DB", {
-  useNewUrlParser: true
-});
+mongoose.connect(
+  "mongodb://localhost:27017/TodoAPI_DB", 
+  { useNewUrlParser: true },
+  () => { console.log('Connected to Database')}
+);
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
