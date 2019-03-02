@@ -15,4 +15,6 @@ Start the server with nodemon: ```nodemon start server.js```
 
 Restart running server by typing: ```rs```
 
+Add a ```.env``` flie to the root directory when first cloning this project for storing environment variables
+
 This API was built with [this tutorial](https://www.codementor.io/olatundegaruba/nodejs-restful-apis-in-10-minutes-q0sgsfhbd).

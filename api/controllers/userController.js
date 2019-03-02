@@ -48,6 +48,9 @@ exports.create_a_user = (req, res) => {
   });
 };
 
+/**
+ * Function to login a user
+ */
 exports.login_a_user = (req, res) => {
   var data = req.body;
   User.findOne({
@@ -84,7 +87,7 @@ exports.login_a_user = (req, res) => {
       obj: user
     });
   });
-}
+};
 
 /**
  * Gets a single user using the user ID sent as a url parameter
