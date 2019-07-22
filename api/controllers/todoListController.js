@@ -25,7 +25,7 @@ exports.create_a_task = (req, res) => {
     if (err) {
       res.send({
         error: err,
-        message: 'Couldn\'t create new task',
+        message: "Couldn't create new task",
         code: 400
       });
     }
@@ -42,7 +42,7 @@ exports.read_a_task = (req, res) => {
     if (err) {
       res.send({
         error: err,
-        message: 'Couldn\'t find task',
+        message: "Couldn't find task",
         code: 400
       });
     }
@@ -57,40 +57,43 @@ exports.read_a_task = (req, res) => {
 exports.update_a_task = (req, res) => {
   Task.findByIdAndUpdate(
     { _id: req.params.taskId },
-    req.body, 
-    { new: true }, 
+    req.body,
+    { new: true },
     (err, task) => {
       if (err) {
         res.send({
           error: err,
-            message: 'Couldn\'t update task',
-            code: 400
+          message: "Couldn't update task",
+          code: 400
         });
-      };
+      }
       res.send({
         message: 'Task updated successfully',
         data: task,
         code: 200
       });
-    });
+    }
+  );
 };
 
 exports.delete_a_task = (req, res) => {
-  Task.remove({
-    _id: req.params.taskId
-  }, 
-  (err, task) => {
-    if (err) {
+  Task.remove(
+    {
+      _id: req.params.taskId
+    },
+    (err, task) => {
+      if (err) {
+        res.send({
+          error: err,
+          message: "Couldn't delete task",
+          code: 400
+        });
+      }
       res.send({
-        error: err,
-        message: 'Couldn\'t delete task',
-        code: 400
+        message: 'Task deleted successfully',
+        data: task,
+        code: 200
       });
     }
-    res.send({
-      message: 'Task deleted successfully',
-      data: task,
-      code: 200
-    });
-  });
-}
+  );
+};
