@@ -31,4 +31,7 @@ $RECYCLE.BIN/
 
 .DS_Store
 Thumbs.db
-UserInterfaceState.xcuserstate
+
+.env
+
+middlewares/config.js
