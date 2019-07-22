@@ -33,7 +33,7 @@ exports.get_all_users = (req, res) => {
  * Creates a new user in the DB
  */
 exports.create_a_user = (req, res) => {
-  var newUser = new User({
+  let newUser = new User({
     name: req.body.name,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 10)
@@ -65,7 +65,7 @@ exports.create_a_user = (req, res) => {
  * Function to login a user
  */
 exports.login_a_user = (req, res) => {
-  var data = req.body;
+  let data = req.body;
   User.findOne(
     {
       email: data.email
