@@ -11,6 +11,10 @@ The different things you can do with this server:
   <li>Routes - Define the API routing for controller functions</li>
 </ul>
 
+Clone repo and run ```npm i``` to install all packages
+
+In the `server.js` file, you can modify the database location and name on line 22
+
 Start the server with nodemon: ```nodemon start server.js```
 
 Restart running server by typing: ```rs```

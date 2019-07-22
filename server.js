@@ -15,6 +15,10 @@ const app = express();
 // DB Connection
 mongoose.Promise = global.Promise;
 mongoose.connect(
+  /**
+   * TODO: CHANGE THE DB LOCATION LOCALLY TO YOUR DB NAME OF CHOICE
+   * OR IN .env CONNECT DB TO REMOTE ADDRESS
+   */
   "mongodb://localhost:27017/TodoAPI_DB", 
   { useNewUrlParser: true },
   () => { console.log('Connected to Database')}
