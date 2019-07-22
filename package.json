@@ -1,17 +1,19 @@
 {
   "name": "nodejs-api-server",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.1.0",
+  "description": "boilerplate nodejs/mongodb server database",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "reset:modules": "rm -rf node_modules && npm i",
+    "security:fix": "npm audit fix"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/benAkehurst/nodejs-api-server.git"
   },
-  "author": "",
+  "author": "Ben Akehurst",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/benAkehurst/nodejs-api-server/issues"
