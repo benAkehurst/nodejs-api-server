@@ -1,7 +1,13 @@
 'use strict';
 const mongoose = require('mongoose');
-const User = mongoose.model('User');
 const bcrypt = require('bcryptjs');
+const _ = require('lodash');
+const jwt = require('jsonwebtoken');
+
+const User = mongoose.model('User');
+
+let config = require('../../middlewares/config');
+let middleware = require('../../middlewares/middleware');
 
 /**
  * This function gets all the users in the Database
@@ -36,14 +42,21 @@ exports.create_a_user = (req, res) => {
     if (err) {
       res.send({
         error: err,
-        message: 'Couldn\'t create new user',
+        message: "Couldn't create new user",
         code: 400
       });
     }
+    let userFiltered = _.pick(user.toObject(), [
+      'name',
+      'email',
+      'created_date',
+      '_id',
+      'status'
+    ]);
     res.status(201).json({
       message: 'User created',
       success: true,
-      obj: user
+      obj: userFiltered
     });
   });
 };
@@ -53,40 +66,54 @@ exports.create_a_user = (req, res) => {
  */
 exports.login_a_user = (req, res) => {
   var data = req.body;
-  User.findOne({
-    email: data.email
-  }, function (err, user) {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        title: 'An error occurred',
-        error: err
+  User.findOne(
+    {
+      email: data.email
+    },
+    (err, user) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          title: 'An error occurred',
+          error: err
+        });
+      }
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          title: 'Login failed',
+          error: {
+            message: 'Invalid login credentials'
+          }
+        });
+      }
+      if (!bcrypt.compareSync(data.password, user.password)) {
+        return res.status(401).json({
+          success: false,
+          title: 'Login failed',
+          error: {
+            message: 'Invalid login credentials'
+          }
+        });
+      }
+      let token = jwt.sign({ username: user.userId }, config.secret, {
+        expiresIn: '24h' // expires in 24 hours
+      });
+      let userFiltered = _.pick(user.toObject(), [
+        'name',
+        'email',
+        'created_date',
+        '_id',
+        'status'
+      ]);
+      res.status(200).json({
+        message: 'Successfully logged in',
+        success: true,
+        obj: userFiltered,
+        token: token
       });
     }
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        title: 'Login failed',
-        error: {
-          message: 'Invalid login credentials'
-        }
-      });
-    }
-    if (!bcrypt.compareSync(data.password, user.password)) {
-      return res.status(401).json({
-        success: false,
-        title: 'Login failed',
-        error: {
-          message: 'Invalid login credentials'
-        }
-      });
-    }
-    res.status(200).json({
-      message: 'Successfully logged in',
-      success: true,
-      obj: user
-    });
-  });
+  );
 };
 
 /**
@@ -97,7 +124,7 @@ exports.get_single_user = (req, res) => {
     if (err) {
       res.send({
         error: err,
-        message: 'Couldn\'t find user',
+        message: "Couldn't find user",
         code: 400
       });
     }
@@ -113,26 +140,29 @@ exports.get_single_user = (req, res) => {
  * Updates a user. Finds them via the user ID in the url parameter
  */
 exports.update_a_user = (req, res) => {
-  User.findByIdAndUpdate({
+  User.findByIdAndUpdate(
+    {
       _id: req.params.userId
     },
-    req.body, {
+    req.body,
+    {
       new: true
     },
     (err, user) => {
       if (err) {
         res.send({
           error: err,
-          message: 'Couldn\'t update user',
+          message: "Couldn't update user",
           code: 400
         });
-      };
+      }
       res.send({
         message: 'User updated successfully',
         data: user,
         code: 200
       });
-    });
+    }
+  );
 };
 
 /**
@@ -141,14 +171,15 @@ exports.update_a_user = (req, res) => {
  * TODO: Then if they really want to delete have admin do it?
  */
 exports.delete_a_user = (req, res) => {
-  User.remove({
+  User.remove(
+    {
       _id: req.params.userId
     },
     (err, user) => {
       if (err) {
         res.send({
           error: err,
-          message: 'Couldn\'t delete user',
+          message: "Couldn't delete user",
           code: 400
         });
       }
@@ -157,5 +188,6 @@ exports.delete_a_user = (req, res) => {
         data: user,
         code: 200
       });
-    });
-}
+    }
+  );
+};
