@@ -5,9 +5,13 @@ module.exports = function (app) {
   /**
    * User Routes
    */
-  app.route('/api/user')
-  .get(userController.get_all_users)
-  .post(userController.create_a_user)
+  app.route('/api/users')
+  .get(userController.get_all_users);
+
+  app.route('/api/user/create')
+  .post(userController.create_a_user);
+
+  app.route('/api/user/login')
   .post(userController.login_a_user);
 
   /**
