@@ -11,22 +11,32 @@ The different things you can do with this server:
   <li>Routes - Define the API routing for controller functions</li>
 </ul>
 
-Clone repo and run ```npm i``` to install all packages
+- Clone repo and run ```npm i``` to install all packages
 
-In the `server.js` file, you can modify the database location and name on line 22
+- In the `server.js` file, you can modify the database location and name on line 22
 
-Start the server with nodemon: ```nodemon start server.js```
+- Start the server with nodemon: ```nodemon start server.js```
 
-Restart running server by typing: ```rs```
+- Restart running server by typing: ```rs```
 
-Add a ```.env``` flie to the root directory when first cloning this project for storing environment variables
-
-Add to db though postman using following syntax:
+- Add to db though postman using following syntax:
 ```
 {
 	"email":"test@test.com",
 	"password":"123"
 }
 ```
+### After cloning to run the project
+
+- Add a ```.env``` flie to the root directory when first cloning this project for storing environment variables
+
+- Add a `config.js` to the `middlewares` file and add your own secret phrase
+```
+module.exports = {
+    secret: 'worldisfullofdevelopers'
+  };
+```
+
+### Credits
 
 This API was built with [this tutorial](https://www.codementor.io/olatundegaruba/nodejs-restful-apis-in-10-minutes-q0sgsfhbd).
