@@ -21,4 +21,12 @@ Restart running server by typing: ```rs```
 
 Add a ```.env``` flie to the root directory when first cloning this project for storing environment variables
 
+Add to db though postman using following syntax:
+```
+{
+	"email":"test@test.com",
+	"password":"123"
+}
+```
+
 This API was built with [this tutorial](https://www.codementor.io/olatundegaruba/nodejs-restful-apis-in-10-minutes-q0sgsfhbd).
