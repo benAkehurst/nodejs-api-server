@@ -1,42 +1,53 @@
-# Nodejs API Server
+# node.js boilerplate API server
 
-## This repo can be cloned and used as a base project of a Node.js API server
+## This repo can be cloned and used as a base project of a node.js API server
 
-This is an tutorial project built to learn how to build a real world API:
+I built this repo to learn how to make an api server. It was created by following [this tutorial](https://www.codementor.io/olatundegaruba/nodejs-restful-apis-in-10-minutes-q0sgsfhbd), and has been expanded on using the lessons learnt.
 
 The different things you can do with this server:
-<ul>
-  <li>Controllers - Deal with DB Read/Write Operations</li>
-  <li>Models - Define Schemas of Objects in the DB</li>
-  <li>Routes - Define the API routing for controller functions</li>
-</ul>
 
-- Clone repo and run ```npm i``` to install all packages
+- Controllers - deal with database read/write operations
+- Models - define schemas of objects in the database
+- Routes - define the API routing for controller functions
 
-- In the `server.js` file, you can modify the database location and name on line 22
+### Todo
 
-- Start the server with nodemon: ```nodemon start server.js```
+- [ ] Add a templating engine to allow for doing serverside templating (ejs or pug)
+- [ ] Add passport.js for logging in via FB, twitter, email
+- [ ] Add firebase support
 
-- Restart running server by typing: ```rs```
+### Installing & config
 
-- Add to db though postman using following syntax:
-```
-{
-	"email":"test@test.com",
-	"password":"123"
-}
-```
-### After cloning to run the project
+1. Clone repo and run ```npm i``` to install all packages
 
-- Add a ```.env``` flie to the root directory when first cloning this project for storing environment variables
+2. In the `server.js` file, you can modify the database location and name on line 22
 
-- Add a `config.js` to the `middlewares` file and add your own secret phrase
-```
+### Running the project
+
+3. Add a ```.env``` flie to the root directory when first cloning this project for storing environment variables
+
+4. Add a `config.js` to the `middlewares` file and add your own secret phrase
+
+``` javascript
 module.exports = {
     secret: 'worldisfullofdevelopers'
   };
 ```
 
-### Credits
+5. Start the server with nodemon: ```nodemon start server.js```
 
-This API was built with [this tutorial](https://www.codementor.io/olatundegaruba/nodejs-restful-apis-in-10-minutes-q0sgsfhbd).
+6. Restart running server by typing: ```rs```
+
+
+### Adding entities to the database
+
+7. Add to db though postman using following syntax:
+
+``` javascript
+{
+"email":"test@test.com",
+"password":"123"
+}
+```
+
+This means that you need to have an empty object with the key pair items that the database is expecting to receive.
