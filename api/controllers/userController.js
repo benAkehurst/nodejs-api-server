@@ -96,7 +96,7 @@ exports.login_a_user = (req, res) => {
           }
         });
       }
-      let token = jwt.sign({ username: user.userId }, config.secret, {
+      let token = jwt.sign({ username: user._id }, config.secret, {
         expiresIn: '24h' // expires in 24 hours
       });
       let userFiltered = _.pick(user.toObject(), [
