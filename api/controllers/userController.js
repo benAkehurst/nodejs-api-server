@@ -4,10 +4,10 @@ const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 
-const User = mongoose.model('User');
-
 let config = require('../../middlewares/config');
 let middleware = require('../../middlewares/middleware');
+
+const User = mongoose.model('User');
 
 /**
  * This function gets all the users in the Database
@@ -15,16 +15,16 @@ let middleware = require('../../middlewares/middleware');
 exports.get_all_users = (req, res) => {
   User.find({}, (err, users) => {
     if (err) {
-      res.send({
+      res.status(204).json({
         error: err,
-        message: 'No users fround',
-        code: 204
+        message: 'No users found',
+        code: 204,
       });
     }
     res.send({
       message: 'All users returned',
       data: users,
-      code: 200
+      code: 200,
     });
   });
 };
@@ -36,28 +36,23 @@ exports.create_a_user = (req, res) => {
   let newUser = new User({
     name: req.body.name,
     email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, 10)
+    password: bcrypt.hashSync(req.body.password, 10),
   });
   newUser.save((err, user) => {
     if (err) {
-      res.send({
+      res.status(400).json({
         error: err,
         message: "Couldn't create new user",
-        code: 400
+        code: 400,
+      });
+    } else {
+      let userFiltered = _.pick(user.toObject(), ['name', '_id', 'userId']);
+      res.status(201).json({
+        message: 'User created',
+        success: true,
+        obj: userFiltered,
       });
     }
-    let userFiltered = _.pick(user.toObject(), [
-      'name',
-      'email',
-      'created_date',
-      '_id',
-      'status'
-    ]);
-    res.status(201).json({
-      message: 'User created',
-      success: true,
-      obj: userFiltered
-    });
   });
 };
 
@@ -68,14 +63,14 @@ exports.login_a_user = (req, res) => {
   let data = req.body;
   User.findOne(
     {
-      email: data.email
+      email: data.email,
     },
     (err, user) => {
       if (err) {
         return res.status(500).json({
           success: false,
           title: 'An error occurred',
-          error: err
+          error: err,
         });
       }
       if (!user) {
@@ -83,8 +78,8 @@ exports.login_a_user = (req, res) => {
           success: false,
           title: 'Login failed',
           error: {
-            message: 'Invalid login credentials'
-          }
+            message: 'Invalid login credentials',
+          },
         });
       }
       if (!bcrypt.compareSync(data.password, user.password)) {
@@ -92,25 +87,20 @@ exports.login_a_user = (req, res) => {
           success: false,
           title: 'Login failed',
           error: {
-            message: 'Invalid login credentials'
-          }
+            message: 'Invalid login credentials',
+          },
         });
       }
       let token = jwt.sign({ username: user._id }, config.secret, {
-        expiresIn: '24h' // expires in 24 hours
+        expiresIn: '24h', // expires in 24 hours
       });
-      let userFiltered = _.pick(user.toObject(), [
-        'name',
-        'email',
-        'created_date',
-        '_id',
-        'status'
-      ]);
+      let userFiltered = _.pick(user.toObject(), ['name', 'email', '_id']);
+      userFiltered.token = token;
+      res.cookie('token', token, { expiresIn: '24h' });
       res.status(200).json({
         message: 'Successfully logged in',
         success: true,
-        obj: userFiltered,
-        token: token
+        succesObj: userFiltered,
       });
     }
   );
@@ -122,16 +112,16 @@ exports.login_a_user = (req, res) => {
 exports.get_single_user = (req, res) => {
   User.findById(req.params.userId, (err, user) => {
     if (err) {
-      res.send({
+      res.status(400).json({
         error: err,
         message: "Couldn't find user",
-        code: 400
+        code: 400,
       });
     }
     res.send({
       message: 'User found',
       data: user,
-      code: 200
+      code: 200,
     });
   });
 };
@@ -142,24 +132,24 @@ exports.get_single_user = (req, res) => {
 exports.update_a_user = (req, res) => {
   User.findByIdAndUpdate(
     {
-      _id: req.params.userId
+      _id: req.params.userId,
     },
     req.body,
     {
-      new: true
+      new: true,
     },
     (err, user) => {
       if (err) {
-        res.send({
+        res.status(400).json({
           error: err,
           message: "Couldn't update user",
-          code: 400
+          code: 400,
         });
       }
       res.send({
         message: 'User updated successfully',
         data: user,
-        code: 200
+        code: 200,
       });
     }
   );
@@ -173,20 +163,20 @@ exports.update_a_user = (req, res) => {
 exports.delete_a_user = (req, res) => {
   User.remove(
     {
-      _id: req.params.userId
+      _id: req.params.userId,
     },
     (err, user) => {
       if (err) {
-        res.send({
+        res.status(400).json({
           error: err,
           message: "Couldn't delete user",
-          code: 400
+          code: 400,
         });
       }
       res.send({
         message: 'User deleted successfully',
         data: user,
-        code: 200
+        code: 200,
       });
     }
   );
