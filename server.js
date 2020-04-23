@@ -6,29 +6,28 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 // Models Imports
-const Task = require('./api/models/todoListModel');
 const User = require('./api/models/userModel');
 
 // Init Express
 const app = express();
+require('dotenv').config();
 
 // DB Connection
 mongoose.Promise = global.Promise;
 mongoose.connect(
-  /**
-   * TODO: CHANGE THE DB LOCATION LOCALLY TO YOUR DB NAME OF CHOICE
-   * OR IN .env CONNECT DB TO REMOTE ADDRESS
-   */
-  'mongodb://localhost:27017/TodoAPI_DB',
+  // `mongodb://${process.env.DB_CONNECT}`,
+  `mongodb://localhost:27017/default_db`,
   {
     useNewUrlParser: true,
-    useCreateIndex: true
+    useFindAndModify: false,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
   },
-  e => {
+  (e) => {
     if (e) {
       const dbError = {
         error: e,
-        msg: 'Error Connecting to Database. Please check MongoDB is running'
+        msg: 'Error Connecting to Database. Please check MongoDB is running',
       };
       console.log(dbError);
     } else {
@@ -38,7 +37,6 @@ mongoose.connect(
 );
 
 // Server Config
-require('dotenv').config();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -59,11 +57,7 @@ app.use(cors());
 
 // Routes Definitions
 const userRoutes = require('./api/routes/userRoutes');
-const authRoutes = require('./api/routes/authRoutes');
-const todoRoutes = require('./api/routes/todoListRoutes');
 userRoutes(app);
-authRoutes(app);
-todoRoutes(app);
 
 // 404 Handling
 app.use((req, res) => {
