@@ -2,21 +2,36 @@
 const mongoose = require('mongoose');
 const Task = mongoose.model('Tasks');
 
+let middleware = require('../../middlewares/middleware');
+
 exports.list_all_tasks = (req, res) => {
-  Task.find({}, (err, tasks) => {
-    if (err) {
-      res.send({
-        error: err,
-        message: 'No tasks fround',
-        code: 204
-      });
-    }
-    res.send({
-      message: 'All tasks returned',
-      data: tasks,
-      code: 200
+  middleware
+    .checkToken(req.params.token)
+    .then((promiseResponse) => {
+      if (promiseResponse.success) {
+        Task.find({}, (err, tasks) => {
+          if (err) {
+            return res.status(500).json({
+              error: err,
+              message: 'No tasks fround',
+              code: 204,
+            });
+          }
+          return res.status(200).json({
+            success: true,
+            data: tasks,
+          });
+        });
+      }
+    })
+    .catch((promiseError) => {
+      if (promiseError) {
+        return res.status(500).json({
+          success: false,
+          message: 'Bad Token',
+        });
+      }
     });
-  });
 };
 
 exports.create_a_task = (req, res) => {
@@ -26,13 +41,13 @@ exports.create_a_task = (req, res) => {
       res.send({
         error: err,
         message: "Couldn't create new task",
-        code: 400
+        code: 400,
       });
     }
     res.send({
       message: 'Task created',
       data: task,
-      code: 201
+      code: 201,
     });
   });
 };
@@ -43,13 +58,13 @@ exports.read_a_task = (req, res) => {
       res.send({
         error: err,
         message: "Couldn't find task",
-        code: 400
+        code: 400,
       });
     }
     res.send({
       message: 'Task found',
       data: task,
-      code: 200
+      code: 200,
     });
   });
 };
@@ -64,13 +79,13 @@ exports.update_a_task = (req, res) => {
         res.send({
           error: err,
           message: "Couldn't update task",
-          code: 400
+          code: 400,
         });
       }
       res.send({
         message: 'Task updated successfully',
         data: task,
-        code: 200
+        code: 200,
       });
     }
   );
@@ -79,20 +94,20 @@ exports.update_a_task = (req, res) => {
 exports.delete_a_task = (req, res) => {
   Task.remove(
     {
-      _id: req.params.taskId
+      _id: req.params.taskId,
     },
     (err, task) => {
       if (err) {
         res.send({
           error: err,
           message: "Couldn't delete task",
-          code: 400
+          code: 400,
         });
       }
       res.send({
         message: 'Task deleted successfully',
         data: task,
-        code: 200
+        code: 200,
       });
     }
   );

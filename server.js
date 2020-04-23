@@ -7,6 +7,7 @@ const cors = require('cors');
 
 // Models Imports
 const User = require('./api/models/userModel');
+const Task = require('./api/models/todoListModel');
 
 // Init Express
 const app = express();
@@ -57,7 +58,9 @@ app.use(cors());
 
 // Routes Definitions
 const userRoutes = require('./api/routes/userRoutes');
+const taskRoutes = require('./api/routes/todoListRoutes');
 userRoutes(app);
+taskRoutes(app);
 
 // 404 Handling
 app.use((req, res) => {
