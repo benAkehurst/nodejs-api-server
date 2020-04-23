@@ -50,3 +50,30 @@ module.exports = {
 ```
 
 This means that you need to have an empty object with the key pair items that the database is expecting to receive.
+
+## Current Routes
+
+`GET - /api/users` - Gets all the users in the DB
+`POST - /api/user/create` - Creates a new user in the db
+
+```javascript
+{
+  "name":"any name",
+"email":"test@test.com",
+"password":"123"
+}
+```
+
+`POST - /api/user/login` - Logins a user
+
+```javascript
+{
+"email":"test@test.com",
+"password":"123"
+}
+```
+
+`GET - /api/user/:userId` - Gets a single user
+`PUT - /api/user/:userId` - Updates a user
+`PUT - /api/user/:userId` - Changes user Status
+`DELETE - /api/user/:userId` - Deletes a user
