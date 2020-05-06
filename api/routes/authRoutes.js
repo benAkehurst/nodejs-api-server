@@ -1,11 +1,6 @@
 'use strict';
 module.exports = (app) => {
-  const userController = require('../controllers/userController');
-
-  /**
-   * User Routes
-   */
-  app.route('/api/login')
-    .post(userController.login_a_user);
-
+  const authController = require('../controllers/authController');
+  app.route('/api/auth/create-new-user').post(authController.create_new_user);
+  app.route('/api/auth/login-user').post(authController.login_user);
 };
