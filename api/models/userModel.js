@@ -11,14 +11,19 @@ const UserSchema = new Schema(
     email: {
       type: String,
       unique: true,
+      required: true,
     },
     password: {
       type: String,
-      unique: true,
+      required: true,
     },
     userActive: {
       type: Boolean,
-      default: [true],
+      default: true,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }
