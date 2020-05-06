@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const config = require('./config.js');
 
 let checkToken = (req) => {
   let token = req;
@@ -7,7 +6,7 @@ let checkToken = (req) => {
     if (!token) {
       reject({ success: false, message: 'No token' });
     } else if (token) {
-      jwt.verify(token, config.secret, (err, decoded) => {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) {
           reject({
             success: false,
