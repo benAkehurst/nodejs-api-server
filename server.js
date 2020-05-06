@@ -57,9 +57,11 @@ app.use((req, res, next) => {
 app.use(cors());
 
 // Routes Definitions
-const userRoutes = require('./api/routes/userRoutes');
+const adminRoutes = require('./api/routes/adminRoutes');
+const authRoutes = require('./api/routes/authRoutes');
 const taskRoutes = require('./api/routes/todoListRoutes');
-userRoutes(app);
+adminRoutes(app);
+authRoutes(app);
 taskRoutes(app);
 
 // 404 Handling
