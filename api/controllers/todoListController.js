@@ -4,21 +4,64 @@ const Task = mongoose.model('Tasks');
 
 let middleware = require('../../middlewares/middleware');
 
+/**
+ * Creates a new task in the datebase
+ */
+exports.create_new_task = (req, res) => {
+  let newTask = new Task({
+    task: req.body.task,
+    user: req.body.userId,
+  });
+  middleware
+    .checkToken(req.params.token)
+    .then((promiseResponse) => {
+      if (promiseResponse.success) {
+        newTask.save((err, task) => {
+          if (err) {
+            return res.status(400).json({
+              success: false,
+              message: "Couldn't create new task",
+              data: null,
+            });
+          }
+          return res.status(201).json({
+            success: true,
+            message: 'Task created',
+            data: task,
+          });
+        });
+      }
+    })
+    .catch((promiseError) => {
+      if (promiseError) {
+        return res.status(500).json({
+          success: false,
+          message: 'Bad Token',
+          data: null,
+        });
+      }
+    });
+};
+
+/**
+ * Lists all the tasks in the DB
+ */
 exports.list_all_tasks = (req, res) => {
   middleware
     .checkToken(req.params.token)
     .then((promiseResponse) => {
       if (promiseResponse.success) {
-        Task.find({}, (err, tasks) => {
+        Task.find({ user: req.params.userId }, (err, tasks) => {
           if (err) {
             return res.status(500).json({
-              error: err,
+              success: false,
               message: 'No tasks fround',
-              code: 204,
+              data: err,
             });
           }
           return res.status(200).json({
             success: true,
+            message: 'Tasks fround',
             data: tasks,
           });
         });
@@ -29,27 +72,10 @@ exports.list_all_tasks = (req, res) => {
         return res.status(500).json({
           success: false,
           message: 'Bad Token',
+          data: null,
         });
       }
     });
-};
-
-exports.create_a_task = (req, res) => {
-  const newTask = new Task(req.body);
-  newTask.save((err, task) => {
-    if (err) {
-      res.send({
-        error: err,
-        message: "Couldn't create new task",
-        code: 400,
-      });
-    }
-    res.send({
-      message: 'Task created',
-      data: task,
-      code: 201,
-    });
-  });
 };
 
 exports.read_a_task = (req, res) => {
