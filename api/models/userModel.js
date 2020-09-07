@@ -4,7 +4,11 @@ const Schema = mongoose.Schema;
 
 const UserSchema = new Schema(
   {
-    name: {
+    firstName: {
+      type: String,
+      required: false,
+    },
+    lastName: {
       type: String,
       required: false,
     },
@@ -17,11 +21,10 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
-    userActive: {
-      type: Boolean,
-      default: true,
+    createdOn: {
+      type: String,
     },
-    isAdmin: {
+    userActive: {
       type: Boolean,
       default: true,
     },
