@@ -1,20 +1,15 @@
-# node.js boilerplate API server
+# Nodejs boilerplate REST API
 
-## This repo can be cloned and used as a base project of a node.js API server
+## This repo can be cloned/forked and used as a boilerplate for a node REST API
 
-I built this repo to learn how to make an api server. It was created by following [this tutorial](https://www.codementor.io/olatundegaruba/nodejs-restful-apis-in-10-minutes-q0sgsfhbd), and has been expanded on using the lessons learnt.
+I built this repo to learn how to make a rest api and server. It was created by following [this tutorial](https://www.codementor.io/olatundegaruba/nodejs-restful-apis-in-10-minutes-q0sgsfhbd), and has been expanded on to service the needs of a boilerplate project.
 
 The different things you can do with this server:
 
-- Controllers - deal with database read/write operations
-- Models - define schemas of objects in the database
-- Routes - define the API routing for controller functions
-
-### Todo
-
-- [ ] Add a templating engine to allow for doing serverside templating (ejs or pug)
-- [ ] Add passport.js for logging in via FB, twitter, email
-- [ ] Add firebase support
+- Controllers - deals with database read/write operations
+- Models - define schemas of objects in collections the database
+- Routes - defines the API routing for controller functions
+- Middlewares - helper files and methods
 
 ### Installing & config
 
@@ -22,58 +17,86 @@ The different things you can do with this server:
 
 2. In the `server.js` file, you can modify the database location and name on line 22
 
+3. Run MongoDB locally with `brew services start mongodb-community`
+
 ### Running the project
 
-3. Add a `.env` flie to the root directory when first cloning this project for storing environment variables
+1. Add a `.env` flie to the root directory when first cloning this project for storing environment variables
 
-4. Add a `config.js` to the `middlewares` file and add your own secret phrase
+2. Add a `JWT_SECRET` to the `.env` file
 
-```javascript
-module.exports = {
-  secret: 'worldisfullofdevelopers',
-};
-```
+3. Start the server with nodemon: `npm start`
 
-5. Start the server with nodemon: `nodemon start server.js`
-
-6. Restart running server by typing: `rs`
-
-### Adding entities to the database
-
-7. Add to db though postman using following syntax:
-
-```javascript
-{
-"email":"test@test.com",
-"password":"123"
-}
-```
-
-This means that you need to have an empty object with the key pair items that the database is expecting to receive.
+4. Restart running server by typing: `rs`
 
 ## Current Routes
 
-`GET - /api/users` - Gets all the users in the DB
-`POST - /api/user/create` - Creates a new user in the db
+### Auth Routes
+
+`/api/auth/create-new-user`
 
 ```javascript
-{
-  "name":"any name",
-"email":"test@test.com",
-"password":"123"
-}
+  POST:
+  {
+    "firstName": "null", (firstName is optional)
+    "lastName": "null", (lastName is optional)
+    "email": "test@test.com",
+    "password": "test" (min 6 chars)
+  }
 ```
 
-`POST - /api/user/login` - Logins a user
+`/api/auth/login-user`
 
 ```javascript
-{
-"email":"test@test.com",
-"password":"123"
-}
+  POST:
+  {
+    "email": "test@test.com",
+    "password": "test" (min 6 chars)
+  }
 ```
 
-`GET - /api/user/:userId` - Gets a single user
-`PUT - /api/user/:userId` - Updates a user
-`PUT - /api/user/:userId` - Changes user Status
-`DELETE - /api/user/:userId` - Deletes a user
+`/api/auth/check-token-valid/:token`
+
+```javascript
+  GET:
+  token - this needs to be JWT token provided when logging in
+```
+
+### Todo Routes
+
+`/api/tasks/create-new-task/:token`
+
+```javascript
+  POST
+  {
+    "task": "string",
+    "userId": "string <-- needs to be the userId from mongodb"
+  }
+```
+
+`/api/tasks/read-all-user-tasks/:userId/:token`
+
+```javascript
+  GET
+  Gets all the tasks from a single user
+```
+
+`/api/tasks/:userId/:token/:taskId`
+
+```javascript
+  GET
+  Gets a single task from a single user
+```
+
+```javascript
+  Updates a single task text
+  PUT
+  {
+    "task": "string"
+  }
+```
+
+```javascript
+  DELETE
+  Deletes a single task
+```
