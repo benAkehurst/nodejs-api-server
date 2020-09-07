@@ -1,18 +1,24 @@
-'use strict';
 const mongoose = require('mongoose');
+const moment = require('moment');
+const tokenMiddleware = require('../../middlewares/token');
+
 const Task = mongoose.model('Tasks');
 
-let middleware = require('../../middlewares/middleware');
-
 /**
- * Creates a new task in the datebase
+ * Creates a new task in the database
+ * POST
+ * {
+ *  "task": "string",
+ *  "userId": "userId from mongodb"
+ * }
  */
 exports.create_new_task = (req, res) => {
   let newTask = new Task({
     task: req.body.task,
     user: req.body.userId,
+    createdOn: moment(),
   });
-  middleware
+  tokenMiddleware
     .checkToken(req.params.token)
     .then((promiseResponse) => {
       if (promiseResponse.success) {
@@ -43,15 +49,12 @@ exports.create_new_task = (req, res) => {
     });
 };
 
-/**
- * Lists all the tasks in the DB
- */
-exports.list_all_tasks = (req, res) => {
-  middleware
+exports.read_all_user_tasks = (req, res) => {
+  tokenMiddleware
     .checkToken(req.params.token)
     .then((promiseResponse) => {
       if (promiseResponse.success) {
-        Task.find({ user: req.params.userId }, (err, tasks) => {
+        Task.find({ user: { $all: req.params.userId } }, (err, tasks) => {
           if (err) {
             return res.status(500).json({
               success: false,
@@ -78,63 +81,112 @@ exports.list_all_tasks = (req, res) => {
     });
 };
 
-exports.read_a_task = (req, res) => {
-  Task.findById(req.params.taskId, (err, task) => {
-    if (err) {
-      res.send({
-        error: err,
-        message: "Couldn't find task",
-        code: 400,
-      });
-    }
-    res.send({
-      message: 'Task found',
-      data: task,
-      code: 200,
+exports.read_single_task = (req, res) => {
+  tokenMiddleware
+    .checkToken(req.params.token)
+    .then((promiseResponse) => {
+      if (promiseResponse.success) {
+        Task.findById(req.params.taskId, (err, task) => {
+          if (err) {
+            res.status(400).json({
+              success: false,
+              message: "Couldn't find task",
+              data: err,
+            });
+          }
+          res.status(200).json({
+            success: true,
+            message: 'Single Task found',
+            data: task,
+          });
+        });
+      }
+    })
+    .catch((promiseError) => {
+      if (promiseError) {
+        return res.status(500).json({
+          success: false,
+          message: 'Bad Token',
+          data: null,
+        });
+      }
     });
-  });
 };
 
-exports.update_a_task = (req, res) => {
-  Task.findByIdAndUpdate(
-    { _id: req.params.taskId },
-    req.body,
-    { new: true },
-    (err, task) => {
-      if (err) {
-        res.send({
-          error: err,
-          message: "Couldn't update task",
-          code: 400,
+/**
+ * Creates a new task in the database
+ * PUT
+ * {
+ *  "task": "string"
+ * }
+ */
+exports.update_single_task = (req, res) => {
+  tokenMiddleware
+    .checkToken(req.params.token)
+    .then((promiseResponse) => {
+      if (promiseResponse.success) {
+        Task.updateOne(
+          { _id: req.params.taskId }, // Filter
+          { $set: { task: req.body.task } }, // Update
+          (err, task) => {
+            if (err) {
+              res.status(400).json({
+                success: false,
+                message: "Couldn't update single task",
+                data: err,
+              });
+            }
+            res.status(200).json({
+              success: true,
+              message: 'Single task updated successfully',
+            });
+          }
+        );
+      }
+    })
+    .catch((promiseError) => {
+      if (promiseError) {
+        return res.status(500).json({
+          success: false,
+          message: 'Bad Token',
+          data: null,
         });
       }
-      res.send({
-        message: 'Task updated successfully',
-        data: task,
-        code: 200,
-      });
-    }
-  );
+    });
 };
 
-exports.delete_a_task = (req, res) => {
-  Task.remove(
-    {
-      _id: req.params.taskId,
-    },
-    (err, task) => {
-      if (err) {
-        res.send({
-          error: err,
-          message: "Couldn't delete task",
-          code: 400,
+exports.delete_single_task = (req, res) => {
+  tokenMiddleware
+    .checkToken(req.params.token)
+    .then((promiseResponse) => {
+      if (promiseResponse.success) {
+        Task.remove(
+          {
+            _id: req.params.taskId,
+          },
+          (err, task) => {
+            if (err) {
+              res.status(400).json({
+                success: false,
+                message: "Couldn't delete task",
+                data: err,
+              });
+            }
+            res.status(200).json({
+              success: true,
+              message: 'Task deleted successfully',
+            });
+          }
+        );
+      }
+    })
+    .catch((promiseError) => {
+      if (promiseError) {
+        return res.status(500).json({
+          success: false,
+          message: 'Bad Token',
+          data: null,
         });
       }
-      res.send({
-        message: 'Task deleted successfully',
-        data: task,
-        code: 200,
-      });
-    }
-  );
+    });
 };
