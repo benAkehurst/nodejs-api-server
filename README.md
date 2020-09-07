@@ -29,6 +29,12 @@ The different things you can do with this server:
 
 4. Restart running server by typing: `rs`
 
+## Available Scripts
+
+- `start` - starts the server
+- `reset` - deletes the node_modules
+- `reinstall` - deletes and then reinstalls the node_modules
+
 ## Current Routes
 
 ### Auth Routes
