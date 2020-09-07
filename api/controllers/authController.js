@@ -1,8 +1,9 @@
-'use strict';
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
+const moment = require('moment');
+const tokenMiddleware = require('../../middlewares/token');
 
 const User = mongoose.model('User');
 
@@ -10,20 +11,25 @@ const User = mongoose.model('User');
  * Creates a new user object in the DB
  * POST:
  * {
- *  "name": "null", (name is optional)
+ *  "firstName": "null", (firstName is optional)
+ *  "lastName": "null", (lastName is optional)
  *  "email": "test@test.com",
  *  "password": "test"
+ *  "createdOn":
  * }
  */
 exports.create_new_user = (req, res) => {
-  const name = req.body.name ? req.body.name : '';
+  const firstName = req.body.firstName ? req.body.firstName : '';
+  const lastName = req.body.lastName ? req.body.lastName : '';
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
 
   let newUser = new User({
-    name: name,
+    firstName: firstName,
+    lastName: lastName,
     email: email,
     password: password,
+    createdOn: moment(),
   });
 
   newUser.save((err, user) => {
@@ -91,4 +97,49 @@ exports.login_user = (req, res) => {
       data: userFiltered,
     });
   });
+};
+
+/**
+ * Can be used to check if a given token is valid
+ * GET:
+ * PARAM: token
+ */
+exports.check_token_valid = async (req, res) => {
+  const token = req.params.token;
+  if (!token || token === null) {
+    res.status(400).json({
+      success: false,
+      message: 'Incorrect Request Parameters',
+      data: null,
+    });
+  }
+  let tokenValid;
+  await tokenMiddleware
+    .checkToken(token)
+    .then((promiseResponse) => {
+      if (promiseResponse.success) {
+        tokenValid = true;
+      }
+    })
+    .catch((promiseError) => {
+      if (promiseError) {
+        return res.status(500).json({
+          success: false,
+          message: 'Bad Token',
+          data: null,
+        });
+      }
+    });
+  if (tokenValid) {
+    res.status(200).json({
+      success: true,
+      message: 'Token Valid',
+      data: null,
+    });
+  } else {
+    res.status(400).json({
+      success: false,
+      message: 'Token not valid',
+    });
+  }
 };
