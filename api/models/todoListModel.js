@@ -6,14 +6,12 @@ const TaskSchema = new Schema(
   {
     task: {
       type: String,
-      required: 'Please enter task name',
     },
     user: {
       type: String,
     },
-    status: {
+    createdOn: {
       type: String,
-      default: 'pending',
     },
   },
   { timestamps: true }
