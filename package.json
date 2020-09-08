@@ -4,7 +4,8 @@
   "description": "boilerplate nodejs/mongodb server database",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "start": "nodemon server.js",
     "reset": "rm -rf node_modules",
     "reinstall": "rm -rf node_modules && npm i",
@@ -29,6 +30,7 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "jest": "^26.4.2",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
     "moment": "^2.27.0",
