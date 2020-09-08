@@ -34,6 +34,8 @@ The different things you can do with this server:
 - `start` - starts the server
 - `reset` - deletes the node_modules
 - `reinstall` - deletes and then reinstalls the node_modules
+- `test` - runs all unit tests
+- `test:watch` - watches for unit tests that have changed and reruns the test suite
 
 ## Current Routes
 
