@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
-const moment = require('moment');
+const { format } = require('date-fns');
 const tokenMiddleware = require('../../middlewares/token');
 
 const User = mongoose.model('User');
@@ -15,7 +15,7 @@ const User = mongoose.model('User');
  *  "lastName": "null", (lastName is optional)
  *  "email": "test@test.com",
  *  "password": "test"
- *  "createdOn":
+ *  "createdOnDate": "string that clearly shows when a user is created"
  * }
  */
 exports.create_new_user = (req, res) => {
@@ -29,7 +29,7 @@ exports.create_new_user = (req, res) => {
     lastName: lastName,
     email: email,
     password: password,
-    createdOn: moment(),
+    createdOnDate: format(new Date(), 'dd/MM/yyyy'),
   });
 
   newUser.save((err, user) => {
