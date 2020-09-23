@@ -21,7 +21,7 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
-    createdOn: {
+    createdOnDate: {
       type: String,
     },
     userActive: {
