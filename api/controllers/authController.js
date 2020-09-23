@@ -1,11 +1,10 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const _ = require('lodash');
-const jwt = require('jsonwebtoken');
-const { format } = require('date-fns');
-const tokenMiddleware = require('../../middlewares/token');
-
-const User = mongoose.model('User');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const _ = require("lodash");
+const jwt = require("jsonwebtoken");
+const { format } = require("date-fns");
+const tokenMiddleware = require("../../middlewares/token");
+const User = require("../models/userModel");
 
 /**
  * Creates a new user object in the DB
@@ -19,8 +18,8 @@ const User = mongoose.model('User');
  * }
  */
 exports.create_new_user = (req, res) => {
-  const firstName = req.body.firstName ? req.body.firstName : '';
-  const lastName = req.body.lastName ? req.body.lastName : '';
+  const firstName = req.body.firstName ? req.body.firstName : "";
+  const lastName = req.body.lastName ? req.body.lastName : "";
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
 
@@ -29,20 +28,20 @@ exports.create_new_user = (req, res) => {
     lastName: lastName,
     email: email,
     password: password,
-    createdOnDate: format(new Date(), 'dd/MM/yyyy'),
+    createdOnDate: format(new Date(), "dd/MM/yyyy"),
   });
 
   newUser.save((err, user) => {
     if (err) {
       res.status(400).json({
         success: false,
-        message: 'Error creating new user',
+        message: "Error creating new user",
         data: err,
       });
     }
     res.status(201).json({
       success: true,
-      message: 'User created',
+      message: "User created",
       data: null,
     });
   });
@@ -62,38 +61,38 @@ exports.login_user = (req, res) => {
     if (err) {
       return res.status(500).json({
         success: false,
-        message: 'An error occurred',
+        message: "An error occurred",
         data: err,
       });
     }
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Login failed',
+        message: "Login failed",
         data: {
-          message: 'Invalid login credentials',
+          message: "Invalid login credentials",
         },
       });
     }
     if (!bcrypt.compareSync(data.password, user.password)) {
       return res.status(401).json({
         success: false,
-        message: 'Login failed',
+        message: "Login failed",
         data: {
-          message: 'Invalid login credentials',
+          message: "Invalid login credentials",
         },
       });
     }
     let token = jwt.sign({ username: user._id }, process.env.JWT_SECRET, {
       // TODO: SET JWT TOKEN DURATION HERE
-      expiresIn: '24h',
+      expiresIn: "24h",
     });
-    let userFiltered = _.pick(user.toObject(), ['name', 'email', '_id']);
+    let userFiltered = _.pick(user.toObject(), ["name", "email", "_id"]);
     userFiltered.token = token;
-    res.cookie('token', token, { expiresIn: '24h' });
+    res.cookie("token", token, { expiresIn: "24h" });
     res.status(200).json({
       success: true,
-      message: 'Successfully logged in',
+      message: "Successfully logged in",
       data: userFiltered,
     });
   });
@@ -109,7 +108,7 @@ exports.check_token_valid = async (req, res) => {
   if (!token || token === null) {
     res.status(400).json({
       success: false,
-      message: 'Incorrect Request Parameters',
+      message: "Incorrect Request Parameters",
       data: null,
     });
   }
@@ -125,7 +124,7 @@ exports.check_token_valid = async (req, res) => {
       if (promiseError) {
         return res.status(500).json({
           success: false,
-          message: 'Bad Token',
+          message: "Bad Token",
           data: null,
         });
       }
@@ -133,13 +132,13 @@ exports.check_token_valid = async (req, res) => {
   if (tokenValid) {
     res.status(200).json({
       success: true,
-      message: 'Token Valid',
+      message: "Token Valid",
       data: null,
     });
   } else {
     res.status(400).json({
       success: false,
-      message: 'Token not valid',
+      message: "Token not valid",
     });
   }
 };

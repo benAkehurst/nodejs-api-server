@@ -1,7 +1,4 @@
-const mongoose = require('mongoose');
-const _ = require('lodash');
-
-const User = mongoose.model('User');
+const User = require("../models/userModel");
 
 /**
  * Fetches all users in the database
@@ -20,20 +17,20 @@ exports.get_all_users = async (req, res) => {
       if (err) {
         res.status(204).json({
           success: false,
-          message: 'No users found',
+          message: "No users found",
           data: err,
         });
       }
       res.status(200).json({
         success: true,
-        message: 'All users found',
+        message: "All users found",
         data: users,
       });
     });
   } else {
     res.status(401).json({
       success: false,
-      message: 'Not authorized',
+      message: "Not authorized",
       data: null,
     });
   }
@@ -74,7 +71,7 @@ exports.change_user_admin_role = async (req, res) => {
         }
         res.status(200).json({
           success: true,
-          message: 'User role changed found',
+          message: "User role changed found",
           data: null,
         });
       }
@@ -82,7 +79,7 @@ exports.change_user_admin_role = async (req, res) => {
   } else {
     res.status(401).json({
       success: false,
-      message: 'Not authorized',
+      message: "Not authorized",
       data: null,
     });
   }
@@ -123,7 +120,7 @@ exports.change_user_status = async (req, res) => {
         }
         res.status(200).json({
           success: true,
-          message: 'User status changed',
+          message: "User status changed",
           data: null,
         });
       }
@@ -131,7 +128,7 @@ exports.change_user_status = async (req, res) => {
   } else {
     res.status(401).json({
       success: false,
-      message: 'Not authorized',
+      message: "Not authorized",
       data: null,
     });
   }
@@ -167,14 +164,14 @@ exports.get_single_user = async (req, res) => {
       }
       res.status(200).json({
         success: true,
-        message: 'User found',
+        message: "User found",
         data: user,
       });
     });
   } else {
     res.status(401).json({
       success: false,
-      message: 'Not authorized',
+      message: "Not authorized",
       data: null,
     });
   }

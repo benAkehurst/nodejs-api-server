@@ -1,8 +1,7 @@
-const mongoose = require('mongoose');
-const { format } = require('date-fns');
-const tokenMiddleware = require('../../middlewares/token');
-
-const Task = mongoose.model('Tasks');
+const mongoose = require("mongoose");
+const { format } = require("date-fns");
+const tokenMiddleware = require("../../middlewares/token");
+const Task = require("../models/taskModel");
 
 /**
  * Creates a new task in the database
@@ -18,8 +17,8 @@ exports.create_new_task = (req, res) => {
   let newTask = new Task({
     task: req.body.task,
     user: req.body.userId,
-    createdOnDate: format(new Date(), 'dd/MM/yyyy'),
-    createdOnTime: format(new Date(), 'HH:mm'),
+    createdOnDate: format(new Date(), "dd/MM/yyyy"),
+    createdOnTime: format(new Date(), "HH:mm"),
   });
   tokenMiddleware
     .checkToken(req.params.token)
@@ -35,7 +34,7 @@ exports.create_new_task = (req, res) => {
           }
           return res.status(201).json({
             success: true,
-            message: 'Task created',
+            message: "Task created",
             data: task,
           });
         });
@@ -45,7 +44,7 @@ exports.create_new_task = (req, res) => {
       if (promiseError) {
         return res.status(500).json({
           success: false,
-          message: 'Bad Token',
+          message: "Bad Token",
           data: null,
         });
       }
@@ -61,13 +60,13 @@ exports.read_all_user_tasks = (req, res) => {
           if (err) {
             return res.status(500).json({
               success: false,
-              message: 'No tasks fround',
+              message: "No tasks fround",
               data: err,
             });
           }
           return res.status(200).json({
             success: true,
-            message: 'Tasks fround',
+            message: "Tasks fround",
             data: tasks,
           });
         });
@@ -77,7 +76,7 @@ exports.read_all_user_tasks = (req, res) => {
       if (promiseError) {
         return res.status(500).json({
           success: false,
-          message: 'Bad Token',
+          message: "Bad Token",
           data: null,
         });
       }
@@ -99,7 +98,7 @@ exports.read_single_task = (req, res) => {
           }
           res.status(200).json({
             success: true,
-            message: 'Single Task found',
+            message: "Single Task found",
             data: task,
           });
         });
@@ -109,7 +108,7 @@ exports.read_single_task = (req, res) => {
       if (promiseError) {
         return res.status(500).json({
           success: false,
-          message: 'Bad Token',
+          message: "Bad Token",
           data: null,
         });
       }
@@ -141,7 +140,7 @@ exports.update_single_task = (req, res) => {
             }
             res.status(200).json({
               success: true,
-              message: 'Single task updated successfully',
+              message: "Single task updated successfully",
             });
           }
         );
@@ -151,7 +150,7 @@ exports.update_single_task = (req, res) => {
       if (promiseError) {
         return res.status(500).json({
           success: false,
-          message: 'Bad Token',
+          message: "Bad Token",
           data: null,
         });
       }
@@ -177,7 +176,7 @@ exports.delete_single_task = (req, res) => {
             }
             res.status(200).json({
               success: true,
-              message: 'Task deleted successfully',
+              message: "Task deleted successfully",
             });
           }
         );
@@ -187,7 +186,7 @@ exports.delete_single_task = (req, res) => {
       if (promiseError) {
         return res.status(500).json({
           success: false,
-          message: 'Bad Token',
+          message: "Bad Token",
           data: null,
         });
       }
