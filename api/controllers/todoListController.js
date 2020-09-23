@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
+const { format } = require('date-fns');
 const tokenMiddleware = require('../../middlewares/token');
 
 const Task = mongoose.model('Tasks');
@@ -10,13 +10,16 @@ const Task = mongoose.model('Tasks');
  * {
  *  "task": "string",
  *  "userId": "userId from mongodb"
+ *  "createdOnDate": "string that clearly shows when a task is created",
+ *  "createdOnTime": "string that shows the time when a task is created"
  * }
  */
 exports.create_new_task = (req, res) => {
   let newTask = new Task({
     task: req.body.task,
     user: req.body.userId,
-    createdOn: moment(),
+    createdOnDate: format(new Date(), 'dd/MM/yyyy'),
+    createdOnTime: format(new Date(), 'HH:mm'),
   });
   tokenMiddleware
     .checkToken(req.params.token)

@@ -10,7 +10,10 @@ const TaskSchema = new Schema(
     user: {
       type: String,
     },
-    createdOn: {
+    createdOnDate: {
+      type: String,
+    },
+    createdOnTime: {
       type: String,
     },
   },
