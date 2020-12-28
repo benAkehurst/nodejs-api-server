@@ -126,7 +126,7 @@ exports.login_user = (req, res) => {
  * GET:
  * PARAM: token
  */
-exports.check_token_valid = async (req, res) => {
+exports.check_token_valid_external = async (req, res) => {
   const token = req.params.token;
   if (!token || token === null) {
     res.status(400).json({
