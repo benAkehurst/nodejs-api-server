@@ -28,6 +28,10 @@ const UserSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    uniqueId: {
+      type: String,
+      required: false,
+    },
   },
   { timestamps: true }
 );
