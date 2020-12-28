@@ -1,3 +1,5 @@
+const User = require('../api/models/userModel');
+
 /**
  * isValidEmail helper method
  * @param {string} email
@@ -20,7 +22,19 @@ const validatePassword = (password) => {
   return true;
 };
 
+const checkEmailExists = (email) => {
+  const submittedEmail = email;
+  return User.find({ email: submittedEmail }).then((result) => {
+    if (result && result.length > 0) {
+      return false;
+    } else {
+      return true;
+    }
+  });
+};
+
 module.exports = {
   validateEmail,
   validatePassword,
+  checkEmailExists,
 };
