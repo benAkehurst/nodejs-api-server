@@ -26,7 +26,14 @@ const UserSchema = new Schema(
     },
     userActive: {
       type: Boolean,
-      default: true,
+      default: false,
+    },
+    acceptedTerms: {
+      type: Boolean,
+    },
+    userStatus: {
+      type: String,
+      default: 'pending',
     },
     uniqueId: {
       type: String,
