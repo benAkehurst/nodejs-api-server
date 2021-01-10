@@ -2,14 +2,14 @@
 
 ## This repo can be cloned/forked and used as a boilerplate for a node REST API
 
-I built this repo to learn how to make a rest api and server. It was created by following [this tutorial](https://www.codementor.io/olatundegaruba/nodejs-restful-apis-in-10-minutes-q0sgsfhbd), and has been expanded on to service the needs of a boilerplate project.
+I built this repo to learn how to make a rest api and server. It was created by following [this tutorial](https://www.codementor.io/olatundegaruba/nodejs-restful-apis-in-10-minutes-q0sgsfhbd), and has been expanded on to service the needs of a boilerplate project. I've also used inspiration from [this awesome dev!](https://github.com/christopherliedtke)
 
 The different things you can do with this server:
 
-- Controllers - deals with database read/write operations
-- Models - define schemas of objects in collections the database
-- Routes - defines the API routing for controller functions
-- Middlewares - helper files and methods
+- Controllers - deals with database read/write operations and logic.
+- Models - define schemas of objects in collections the database.
+- Routes - defines the API routing for controller functions.
+- Middlewares - helper files, utils and methods. Basically anything that isn't done by a controller.
 
 ### Installing & config
 
@@ -25,7 +25,7 @@ The different things you can do with this server:
 
 2. Add a `JWT_SECRET` to the `.env` file
 
-3. Start the server with nodemon: `npm start`
+3. Start the server with nodemon: `npm start`. Currently the default port for the server is `5000` and this can be set in the `.env`. This is to prevent clashes when running the server and clients in dev locally.
 
 4. Restart running server by typing: `rs`
 
@@ -41,70 +41,74 @@ The different things you can do with this server:
 
 ### Auth Routes
 
-`/api/auth/create-new-user`
+#### `/api/v1/auth/login-user`
 
 ```javascript
   POST:
   {
-    "firstName": "null", (firstName is optional)
-    "lastName": "null", (lastName is optional)
-    "email": "test@test.com",
-    "password": "test" (min 6 chars)
+    "email": "",
+    "password": "" (at least 6 characters long and contain a lowercase letter, an uppercase letter, a numeric digit and a special character.)
   }
 ```
 
-`/api/auth/login-user`
+#### `/api/v1/auth/create-new-user`
 
 ```javascript
   POST:
   {
-    "email": "test@test.com",
-    "password": "test" (min 6 chars)
+    "firstName": "", (firstName is optional)
+    "lastName": "", (lastName is optional)
+    "email": "",
+    "password": "" (at least 6 characters long and contain a lowercase letter, an uppercase letter, a numeric digit and a special character.)
+    "password2": ""
+    "acceptedTerms": Boolean
   }
 ```
 
-`/api/auth/check-token-valid/:token`
+#### `/api/v1/auth/verification/verify-account/:uniqueId/:secretCode`
+
+This route is activated when a user clicks the link in an email sent to then when creating a new account.
+
+#### `/api/v1/auth/password-reset/get-code`
+
+Allows a user to get a password reset code emailed to them.
 
 ```javascript
-  GET:
-  token - this needs to be JWT token provided when logging in
-```
-
-### Todo Routes
-
-`/api/tasks/create-new-task/:token`
-
-```javascript
-  POST
+  POST:
   {
-    "task": "string",
-    "userId": "string <-- needs to be the userId from mongodb"
+    "email": "",
+    "password": "",
+    "password2": "",
+    "code": "" (this will have been emailed to the user)
   }
 ```
 
-`/api/tasks/read-all-user-tasks/:userId/:token`
+#### `/api/v1/auth/password-reset/verify-code
+
+Allows a user to get a password reset code emailed to them.
+
+```javascript
+  POST:
+  {
+    "email": ""
+  }
+```
+
+#### `/api/v1/auth/delete-account`
+
+Allows a user to delete their account.
+
+```javascript
+  POST:
+  {
+    "password": "",
+    "uniqueId": ""
+  }
+```
+
+#### `/api/v1/auth/check-token-valid-external/:token`
 
 ```javascript
   GET
-  Gets all the tasks from a single user
-```
-
-`/api/tasks/:userId/:token/:taskId`
-
-```javascript
-  GET
-  Gets a single task from a single user
-```
-
-```javascript
-  Updates a single task text
-  PUT
-  {
-    "task": "string"
-  }
-```
-
-```javascript
-  DELETE
-  Deletes a single task
+  External route to check if a token is valid
 ```
