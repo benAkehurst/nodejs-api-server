@@ -4,6 +4,8 @@ const http = require('http');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const morgan = require('morgan');
+const winston = require('./config/winston');
 
 // Models Imports
 const User = require('./api/models/userModel');
@@ -43,6 +45,7 @@ mongoose.connect(
 // Server Config
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(morgan('combined', { stream: winston.stream }));
 
 // Cors Controls
 app.use((req, res, next) => {
@@ -69,6 +72,7 @@ taskRoutes(app);
 
 // 404 Handling
 app.use((req, res) => {
+  winston.error(`'Hit 404' - ${req.originalUrl} - ${req.method} - ${req.ip}`);
   res.status(404).send({ url: req.originalUrl + ' not found' });
 });
 
