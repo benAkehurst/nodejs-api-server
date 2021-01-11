@@ -33,5 +33,4 @@ $RECYCLE.BIN/
 Thumbs.db
 
 .env
-
-middlewares/config.js
+.logs/
