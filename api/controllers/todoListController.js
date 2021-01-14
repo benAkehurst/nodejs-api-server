@@ -1,194 +1,264 @@
-const mongoose = require("mongoose");
-const { format } = require("date-fns");
-const tokenMiddleware = require("../../middlewares/token");
-const Task = require("../models/taskModel");
+const mongoose = require('mongoose');
+const { format } = require('date-fns');
+const tokenMiddleware = require('../../middlewares/token');
+const { checkUserExists } = require('../../middlewares/validators');
+const Task = require('../models/taskModel');
 
 /**
  * Creates a new task in the database
  * POST
  * {
- *  "task": "string",
- *  "userId": "userId from mongodb"
- *  "createdOnDate": "string that clearly shows when a task is created",
- *  "createdOnTime": "string that shows the time when a task is created"
+ *  "task": "",
+ *  "uuid": ""
  * }
  */
-exports.create_new_task = (req, res) => {
-  let newTask = new Task({
-    task: req.body.task,
-    user: req.body.userId,
-    createdOnDate: format(new Date(), "dd/MM/yyyy"),
-    createdOnTime: format(new Date(), "HH:mm"),
-  });
-  tokenMiddleware
-    .checkToken(req.params.token)
-    .then((promiseResponse) => {
-      if (promiseResponse.success) {
-        newTask.save((err, task) => {
-          if (err) {
-            return res.status(400).json({
-              success: false,
-              message: "Couldn't create new task",
-              data: null,
-            });
-          }
-          return res.status(201).json({
-            success: true,
-            message: "Task created",
-            data: task,
-          });
-        });
-      }
-    })
-    .catch((promiseError) => {
-      if (promiseError) {
-        return res.status(500).json({
-          success: false,
-          message: "Bad Token",
-          data: null,
-        });
-      }
+exports.create_new_task = async (req, res) => {
+  const { uuid, token, task } = req.body;
+  if (!uuid || !token || !task) {
+    res.status(400).json({
+      success: false,
+      message: 'Missing request data',
+      data: null,
     });
-};
-
-exports.read_all_user_tasks = (req, res) => {
-  tokenMiddleware
-    .checkToken(req.params.token)
-    .then((promiseResponse) => {
-      if (promiseResponse.success) {
-        Task.find({ user: { $all: req.params.userId } }, (err, tasks) => {
-          if (err) {
-            return res.status(500).json({
-              success: false,
-              message: "No tasks fround",
-              data: err,
-            });
-          }
-          return res.status(200).json({
-            success: true,
-            message: "Tasks fround",
-            data: tasks,
+  }
+  try {
+    let tokenValid = await tokenMiddleware.checkToken(token);
+    let userExists = await checkUserExists(uuid);
+    if (tokenValid.success && userExists) {
+      let newTask = new Task({
+        task: task,
+        user: uuid,
+        createdOnDate: format(new Date(), 'dd/MM/yyyy'),
+        createdOnTime: format(new Date(), 'HH:mm'),
+      });
+      await newTask.save((err, task) => {
+        if (err) {
+          res.status(400).json({
+            success: false,
+            message: `Couldn't save new task.`,
+            data: err,
           });
-        });
-      }
-    })
-    .catch((promiseError) => {
-      if (promiseError) {
-        return res.status(500).json({
-          success: false,
-          message: "Bad Token",
-          data: null,
-        });
-      }
-    });
-};
-
-exports.read_single_task = (req, res) => {
-  tokenMiddleware
-    .checkToken(req.params.token)
-    .then((promiseResponse) => {
-      if (promiseResponse.success) {
-        Task.findById(req.params.taskId, (err, task) => {
-          if (err) {
-            res.status(400).json({
-              success: false,
-              message: "Couldn't find task",
-              data: err,
-            });
-          }
+        } else {
           res.status(200).json({
-            success: true,
-            message: "Single Task found",
+            success: false,
+            message: `Task saved successfully.`,
             data: task,
           });
-        });
-      }
-    })
-    .catch((promiseError) => {
-      if (promiseError) {
-        return res.status(500).json({
-          success: false,
-          message: "Bad Token",
-          data: null,
-        });
-      }
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: `Couldn't find user or token invalid.`,
+        data: null,
+      });
+    }
+  } catch {
+    res.status(400).json({
+      success: false,
+      message: 'Something went wrong creating a task - General Error',
+      data: null,
     });
+  }
+};
+
+/**
+ * Gets all user tasks from the DB
+ * GET
+ * PARAMS: /:uniqueId /:token
+ */
+exports.read_all_user_tasks = async (req, res) => {
+  const { uuid, token } = req.params;
+  if (!uuid || !token) {
+    res.status(400).json({
+      success: false,
+      message: 'Missing request data',
+      data: null,
+    });
+  }
+  try {
+    let tokenValid = await tokenMiddleware.checkToken(token);
+    let userExists = await checkUserExists(uuid);
+    if (tokenValid.success && userExists) {
+      Task.find({ user: { $all: uuid } }, (err, tasks) => {
+        if (err) {
+          return res.status(400).json({
+            success: false,
+            message: 'No tasks fround.',
+            data: err,
+          });
+        }
+        return res.status(200).json({
+          success: true,
+          message: 'Tasks fround.',
+          data: tasks,
+        });
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: `Couldn't find user or token invalid.`,
+        data: null,
+      });
+    }
+  } catch {
+    res.status(400).json({
+      success: false,
+      message: 'Something went wrong fetching all tasks - General Error',
+      data: null,
+    });
+  }
+};
+
+/**
+ * Gets all user tasks from the DB
+ * GET
+ * PARAMS: /:uniqueId /:token /:taskId
+ */
+exports.read_single_task = async (req, res) => {
+  const { uuid, token, taskId } = req.params;
+  if (!uuid || !token || !taskId) {
+    res.status(400).json({
+      success: false,
+      message: 'Missing request data',
+      data: null,
+    });
+  }
+  try {
+    let tokenValid = await tokenMiddleware.checkToken(token);
+    let userExists = await checkUserExists(uuid);
+    if (tokenValid.success && userExists) {
+      Task.findById(taskId, (err, task) => {
+        if (err) {
+          res.status(400).json({
+            success: false,
+            message: "Couldn't find task",
+            data: err,
+          });
+        }
+        res.status(200).json({
+          success: true,
+          message: 'Single Task found',
+          data: task,
+        });
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: `Couldn't find user or token invalid.`,
+        data: null,
+      });
+    }
+  } catch {
+    res.status(400).json({
+      success: false,
+      message: 'Something went wrong reading single task - General Error',
+      data: null,
+    });
+  }
 };
 
 /**
  * Creates a new task in the database
  * PUT
+ * PARAMS: /:uniqueId /:token /:taskId
  * {
- *  "task": "string"
+ *  "task": ""
  * }
  */
-exports.update_single_task = (req, res) => {
-  tokenMiddleware
-    .checkToken(req.params.token)
-    .then((promiseResponse) => {
-      if (promiseResponse.success) {
-        Task.updateOne(
-          { _id: req.params.taskId }, // Filter
-          { $set: { task: req.body.task } }, // Update
-          (err, task) => {
-            if (err) {
-              res.status(400).json({
-                success: false,
-                message: "Couldn't update single task",
-                data: err,
-              });
-            }
-            res.status(200).json({
-              success: true,
-              message: "Single task updated successfully",
+exports.update_single_task = async (req, res) => {
+  const { uuid, token, taskId } = req.params;
+  const { task } = req.body;
+  if (!uuid || !token || !taskId || !task) {
+    res.status(400).json({
+      success: false,
+      message: 'Missing request data',
+      data: null,
+    });
+  }
+  try {
+    let tokenValid = await tokenMiddleware.checkToken(token);
+    let userExists = await checkUserExists(uuid);
+    if (tokenValid.success && userExists) {
+      Task.updateOne(
+        { _id: taskId },
+        { $set: { task: task } },
+        { new: true },
+        (err, task) => {
+          if (err) {
+            res.status(400).json({
+              success: false,
+              message: "Couldn't update single task.",
+              data: err,
             });
           }
-        );
-      }
-    })
-    .catch((promiseError) => {
-      if (promiseError) {
-        return res.status(500).json({
-          success: false,
-          message: "Bad Token",
-          data: null,
-        });
-      }
+          res.status(200).json({
+            success: true,
+            message: 'Single task updated successfully.',
+            data: task,
+          });
+        }
+      );
+    } else {
+      res.status(400).json({
+        success: false,
+        message: `Couldn't find user or token invalid.`,
+        data: null,
+      });
+    }
+  } catch {
+    res.status(400).json({
+      success: false,
+      message: 'Something went wrong updating single task - General Error',
+      data: null,
     });
+  }
 };
 
-exports.delete_single_task = (req, res) => {
-  tokenMiddleware
-    .checkToken(req.params.token)
-    .then((promiseResponse) => {
-      if (promiseResponse.success) {
-        Task.remove(
-          {
-            _id: req.params.taskId,
-          },
-          (err, task) => {
-            if (err) {
-              res.status(400).json({
-                success: false,
-                message: "Couldn't delete task",
-                data: err,
-              });
-            }
-            res.status(200).json({
-              success: true,
-              message: "Task deleted successfully",
-            });
-          }
-        );
-      }
-    })
-    .catch((promiseError) => {
-      if (promiseError) {
-        return res.status(500).json({
-          success: false,
-          message: "Bad Token",
-          data: null,
-        });
-      }
+/**
+ * Creates a new task in the database
+ * DELETE
+ * PARAMS: /:uniqueId /:token /:taskId
+ */
+exports.delete_single_task = async (req, res) => {
+  const { uuid, token, taskId } = req.params;
+  if (!uuid || !token || !taskId) {
+    res.status(400).json({
+      success: false,
+      message: 'Missing request data',
+      data: null,
     });
+  }
+  try {
+    let tokenValid = await tokenMiddleware.checkToken(token);
+    let userExists = await checkUserExists(uuid);
+    if (tokenValid.success && userExists) {
+      Task.remove({ _id: taskId }, { new: true }, (err, task) => {
+        if (err) {
+          res.status(400).json({
+            success: false,
+            message: "Couldn't delete task",
+            data: err,
+          });
+        }
+        res.status(200).json({
+          success: true,
+          message: 'Task deleted successfully',
+          data: task,
+        });
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: `Couldn't find user or token invalid.`,
+        data: null,
+      });
+    }
+  } catch {
+    res.status(400).json({
+      success: false,
+      message: 'Something went wrong reading single task - General Error',
+      data: null,
+    });
+  }
 };
