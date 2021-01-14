@@ -4,7 +4,10 @@ const jwt = require('jsonwebtoken');
 const cryptoRandomString = require('crypto-random-string');
 const { format } = require('date-fns');
 const { v4: uuidv4 } = require('uuid');
-const { checkEmailExists } = require('../../middlewares/validators');
+const {
+  checkEmailExists,
+  validateEmail,
+} = require('../../middlewares/validators');
 const { sendEmail } = require('../../middlewares/utils/emailService');
 const tokenMiddleware = require('../../middlewares/token');
 const User = require('../models/userModel');
@@ -48,11 +51,7 @@ exports.login_user = async (req, res) => {
             // TODO: SET JWT TOKEN DURATION HERE
             expiresIn: '24h',
           });
-          let userFiltered = _.pick(user.toObject(), [
-            'firstName',
-            'email',
-            'uniqueId',
-          ]);
+          let userFiltered = _.pick(user.toObject(), ['firstName', 'uniqueId']);
           userFiltered.token = token;
           res.cookie('token', token, { expiresIn: '24h' });
           res.status(200).json({
@@ -131,6 +130,12 @@ exports.create_new_user = async (req, res) => {
       message: 'You need to accept the terms of use.',
       data: null,
     });
+  } else if (!validateEmail(email)) {
+    res.status(400).json({
+      success: false,
+      message: 'Email address has invalid format',
+      data: null,
+    });
   } else if (!emailCheck) {
     res.status(400).json({
       success: false,
@@ -138,41 +143,49 @@ exports.create_new_user = async (req, res) => {
       data: null,
     });
   } else {
-    const newUser = new User({
-      firstName: firstName ? firstName : '',
-      lastName: lastName ? lastName : '',
-      email: email,
-      password: bcrypt.hashSync(req.body.password, 10),
-      acceptedTerms: true,
-      createdOnDate: format(new Date(), 'dd/MM/yyyy'),
-      uniqueId: uuidv4(),
-    });
-    const user = await newUser.save();
-    const token = jwt.sign({ username: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '24h',
-    });
-    const baseUrl = req.protocol + '://' + req.get('host');
-    const secretCode = cryptoRandomString({
-      length: 6,
-    });
-    const newCode = new Code({
-      code: secretCode,
-      email: user.email,
-    });
-    await newCode.save();
-    const data = {
-      from: `YOUR NAME <${process.env.EMAIL_USERNAME}>`,
-      to: user.email,
-      subject: 'Your Activation Link for YOUR APP',
-      text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user._id}/${secretCode}`,
-      html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/v1/auth/verification/verify-account/${user.uniqueId}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
-    };
-    await sendEmail(data);
-    res.status(201).json({
-      success: true,
-      message: 'User created',
-      data: { userId: user.uniqueId, token: token },
-    });
+    try {
+      const newUser = new User({
+        firstName: firstName ? firstName : '',
+        lastName: lastName ? lastName : '',
+        email: email,
+        password: bcrypt.hashSync(req.body.password, 10),
+        acceptedTerms: true,
+        createdOnDate: format(new Date(), 'dd/MM/yyyy'),
+        uniqueId: uuidv4(),
+      });
+      const user = await newUser.save();
+      const token = jwt.sign({ username: user._id }, process.env.JWT_SECRET, {
+        expiresIn: '24h',
+      });
+      const baseUrl = req.protocol + '://' + req.get('host');
+      const secretCode = cryptoRandomString({
+        length: 6,
+      });
+      const newCode = new Code({
+        code: secretCode,
+        email: user.email,
+      });
+      await newCode.save();
+      const data = {
+        from: `YOUR NAME <${process.env.EMAIL_USERNAME}>`,
+        to: user.email,
+        subject: 'Your Activation Link for YOUR APP',
+        text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user._id}/${secretCode}`,
+        html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/v1/auth/verification/verify-account/${user.uniqueId}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
+      };
+      await sendEmail(data);
+      res.status(201).json({
+        success: true,
+        message: 'User created',
+        data: { userId: user.uniqueId, token: token },
+      });
+    } catch {
+      res.status(400).json({
+        success: false,
+        message: 'General Error Creating new account',
+        data: null,
+      });
+    }
   }
 };
 

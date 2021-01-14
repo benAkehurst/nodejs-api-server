@@ -6,8 +6,8 @@ const User = require('../api/models/userModel');
  * @returns {Boolean} True or False
  */
 const validateEmail = (email) => {
-  const regEx = /\S+@\S+\.\S+/;
-  return regEx.test(email);
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(String(email).toLowerCase());
 };
 
 /**
@@ -33,8 +33,19 @@ const checkEmailExists = (email) => {
   });
 };
 
+const checkUserExists = async (uuid) => {
+  return User.findOne({ uniqueId: uuid }, (err, success) => {
+    if (err) {
+      return false;
+    } else if (success) {
+      return true;
+    }
+  });
+};
+
 module.exports = {
   validateEmail,
   validatePassword,
   checkEmailExists,
+  checkUserExists,
 };
