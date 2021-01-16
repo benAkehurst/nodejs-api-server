@@ -9,8 +9,8 @@ const {
   checkEmailExists,
   validateEmail,
 } = require('../../middlewares/validators');
+const { checkToken } = require('../../middlewares/token');
 const { sendEmail } = require('../../middlewares/utils/emailService');
-const tokenMiddleware = require('../../middlewares/token');
 const User = require('../models/userModel');
 const Code = require('../models/codeModel');
 
@@ -430,41 +430,34 @@ exports.delete_user_account = async (req, res) => {
  * PARAM: token
  */
 exports.check_token_valid_external = async (req, res) => {
-  const token = req.params.token;
-  if (!token || token === null) {
+  const { token } = req.params;
+  if (!token) {
     res.status(400).json({
       success: false,
       message: 'Incorrect Request Parameters',
       data: null,
     });
   }
-  let tokenValid;
-  await tokenMiddleware
-    .checkToken(token)
-    .then((promiseResponse) => {
-      if (promiseResponse.success) {
-        tokenValid = true;
-      }
-    })
-    .catch((promiseError) => {
-      if (promiseError) {
-        return res.status(500).json({
-          success: false,
-          message: 'Bad Token',
-          data: null,
-        });
-      }
-    });
-  if (tokenValid) {
-    res.status(200).json({
-      success: true,
-      message: 'Token Valid',
-      data: null,
-    });
-  } else {
-    res.status(400).json({
+  try {
+    let tokenValid = await checkToken(token);
+    if (!tokenValid) {
+      res.status(400).json({
+        success: false,
+        message: 'Token Not Valid',
+        data: null,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: 'Token Valid',
+        data: null,
+      });
+    }
+  } catch {
+    res.status(500).json({
       success: false,
-      message: 'Token not valid',
+      message: 'Oh, something went wrong checking token. Please try again!',
+      data: null,
     });
   }
 };
