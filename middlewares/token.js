@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-let checkToken = (req) => {
+const checkToken = (req) => {
   let token = req;
   return new Promise((resolve, reject) => {
     if (!token) {
@@ -28,4 +28,4 @@ let checkToken = (req) => {
   });
 };
 
-module.exports = { checkToken: checkToken };
+module.exports = { checkToken };

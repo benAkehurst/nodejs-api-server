@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { format } = require('date-fns');
 const sanitize = require('mongo-sanitize');
 const { v4: uuidv4 } = require('uuid');
-const tokenMiddleware = require('../../middlewares/token');
+const { checkToken } = require('../../middlewares/token');
 const { checkUserExists } = require('../../middlewares/validators');
 const Task = require('../models/taskModel');
 
@@ -24,7 +24,7 @@ exports.create_new_task = async (req, res) => {
     });
   } else {
     try {
-      let tokenValid = await tokenMiddleware.checkToken(token);
+      let tokenValid = await checkToken(token);
       let userExists = await checkUserExists(uniqueId);
       if (tokenValid.success && userExists) {
         let newTask = new Task({
@@ -81,9 +81,10 @@ exports.read_all_user_tasks = async (req, res) => {
     });
   } else {
     try {
-      let tokenValid = await tokenMiddleware.checkToken(token);
+      let tokenValid = await checkToken(token);
       let userExists = await checkUserExists(uniqueId);
       if (tokenValid.success && userExists) {
+        // TODO: Call cache here?
         Task.find({ user: { $all: uniqueId } }, (err, tasks) => {
           if (err) {
             return res.status(400).json({
@@ -130,8 +131,9 @@ exports.read_single_task = async (req, res) => {
     });
   } else {
     try {
-      let tokenValid = await tokenMiddleware.checkToken(token);
+      let tokenValid = await checkToken(token);
       let userExists = await checkUserExists(uniqueId);
+      // TODO: Call cache here?
       if (tokenValid.success && userExists) {
         Task.find({ externalId: sanitize(externalId) }, (err, task) => {
           if (err) {
@@ -184,7 +186,7 @@ exports.update_single_task = async (req, res) => {
     });
   } else {
     try {
-      let tokenValid = await tokenMiddleware.checkToken(token);
+      let tokenValid = await checkToken(token);
       let userExists = await checkUserExists(uniqueId);
       if (tokenValid.success && userExists) {
         Task.updateOne(
@@ -238,7 +240,7 @@ exports.delete_single_task = async (req, res) => {
     });
   } else {
     try {
-      let tokenValid = await tokenMiddleware.checkToken(token);
+      let tokenValid = await checkToken(token);
       let userExists = await checkUserExists(uniqueId);
       if (tokenValid.success && userExists) {
         Task.deleteOne(
