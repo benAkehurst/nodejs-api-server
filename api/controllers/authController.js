@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const cryptoRandomString = require('crypto-random-string');
 const { format } = require('date-fns');
 const { v4: uuidv4 } = require('uuid');
+const sanitize = require('mongo-sanitize');
 const {
   checkEmailExists,
   validateEmail,
@@ -31,7 +32,7 @@ exports.login_user = async (req, res) => {
     });
   } else {
     try {
-      const user = await User.findOne({ email: email });
+      const user = await User.findOne({ email: sanitize(email) });
       if (!user) {
         res.status(400).json({
           success: false,
@@ -196,10 +197,12 @@ exports.create_new_user = async (req, res) => {
  */
 exports.validate_user_email_and_account = async (req, res) => {
   try {
-    const user = await User.findOne({ uniqueId: req.params.uniqueId });
+    const user = await User.findOne({
+      uniqueId: sanitize(req.params.uniqueId),
+    });
     const response = await Code.findOne({
       email: user.email,
-      code: req.params.secretCode,
+      code: sanitize(req.params.secretCode),
     });
 
     if (!user) {
@@ -245,7 +248,7 @@ exports.get_reset_password_code = async (req, res) => {
     });
   } else {
     try {
-      const user = await User.findOne({ email: email });
+      const user = await User.findOne({ email: sanitize(email) });
 
       if (!user) {
         res.status(400).json({
@@ -335,7 +338,7 @@ exports.verify_new_user_password = async (req, res) => {
       } else {
         const newHashedPw = await bcrypt.hashSync(password, 10);
         await User.updateOne(
-          { email: email },
+          { email: sanitize(email) },
           { $set: { password: newHashedPw } }
         );
         await Code.deleteOne({ email, code });
@@ -374,7 +377,7 @@ exports.delete_user_account = async (req, res) => {
     });
   } else {
     try {
-      const user = await User.findOne({ uniqueId: uniqueId });
+      const user = await User.findOne({ uniqueId: sanitize(uniqueId) });
       if (!user) {
         res.status(400).json({
           success: false,

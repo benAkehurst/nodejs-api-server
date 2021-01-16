@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { format } = require('date-fns');
+const sanitize = require('mongo-sanitize');
 const tokenMiddleware = require('../../middlewares/token');
 const { checkUserExists } = require('../../middlewares/validators');
 const Task = require('../models/taskModel');
@@ -26,7 +27,7 @@ exports.create_new_task = async (req, res) => {
       let userExists = await checkUserExists(uniqueId);
       if (tokenValid.success && userExists) {
         let newTask = new Task({
-          task: task,
+          task: sanitize(task),
           user: uniqueId,
           createdOnDate: format(new Date(), 'dd/MM/yyyy'),
           createdOnTime: format(new Date(), 'HH:mm'),
@@ -171,7 +172,7 @@ exports.read_single_task = async (req, res) => {
  */
 exports.update_single_task = async (req, res) => {
   const { uniqueId, token, taskId } = req.params;
-  const { task } = req.body;
+  const { task } = sanitize(req.body.task);
   if (!uniqueId || !token || !taskId || !task) {
     res.status(400).json({
       success: false,
