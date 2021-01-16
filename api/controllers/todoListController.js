@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { format } = require('date-fns');
 const sanitize = require('mongo-sanitize');
+const { v4: uuidv4 } = require('uuid');
 const tokenMiddleware = require('../../middlewares/token');
 const { checkUserExists } = require('../../middlewares/validators');
 const Task = require('../models/taskModel');
@@ -28,6 +29,7 @@ exports.create_new_task = async (req, res) => {
       if (tokenValid.success && userExists) {
         let newTask = new Task({
           task: sanitize(task),
+          externalId: uuidv4(),
           user: uniqueId,
           createdOnDate: format(new Date(), 'dd/MM/yyyy'),
           createdOnTime: format(new Date(), 'HH:mm'),
@@ -116,11 +118,11 @@ exports.read_all_user_tasks = async (req, res) => {
 /**
  * Gets all user tasks from the DB
  * GET
- * PARAMS: /:uniqueId /:token /:taskId
+ * PARAMS: /:uniqueId /:token /:externalId
  */
 exports.read_single_task = async (req, res) => {
-  const { uniqueId, token, taskId } = req.params;
-  if (!uniqueId || !token || !taskId) {
+  const { uniqueId, token, externalId } = req.params;
+  if (!uniqueId || !token || !externalId) {
     res.status(400).json({
       success: false,
       message: 'Missing request data',
@@ -131,7 +133,7 @@ exports.read_single_task = async (req, res) => {
       let tokenValid = await tokenMiddleware.checkToken(token);
       let userExists = await checkUserExists(uniqueId);
       if (tokenValid.success && userExists) {
-        Task.findById(taskId, (err, task) => {
+        Task.find({ externalId: sanitize(externalId) }, (err, task) => {
           if (err) {
             res.status(400).json({
               success: false,
@@ -165,15 +167,16 @@ exports.read_single_task = async (req, res) => {
 /**
  * Creates a new task in the database
  * PUT
- * PARAMS: /:uniqueId /:token /:taskId
+ * PARAMS: /:uniqueId /:token /:externalId
  * {
- *  "task": ""
+ *  "task": "",
+ *  "completed": boolean
  * }
  */
 exports.update_single_task = async (req, res) => {
-  const { uniqueId, token, taskId } = req.params;
-  const { task } = sanitize(req.body.task);
-  if (!uniqueId || !token || !taskId || !task) {
+  const { uniqueId, token, externalId } = req.params;
+  const { task, completed } = req.body;
+  if (!uniqueId || !token || !externalId || !task) {
     res.status(400).json({
       success: false,
       message: 'Missing request data',
@@ -185,8 +188,8 @@ exports.update_single_task = async (req, res) => {
       let userExists = await checkUserExists(uniqueId);
       if (tokenValid.success && userExists) {
         Task.updateOne(
-          { _id: taskId },
-          { $set: { task: task } },
+          { externalId: sanitize(externalId) },
+          { $set: { task: sanitize(task), completed: completed } },
           { new: true },
           (err, task) => {
             if (err) {
@@ -223,11 +226,11 @@ exports.update_single_task = async (req, res) => {
 /**
  * Creates a new task in the database
  * DELETE
- * PARAMS: /:uniqueId /:token /:taskId
+ * PARAMS: /:uniqueId /:token /:externalId
  */
 exports.delete_single_task = async (req, res) => {
-  const { uniqueId, token, taskId } = req.params;
-  if (!uniqueId || !token || !taskId) {
+  const { uniqueId, token, externalId } = req.params;
+  if (!uniqueId || !token || !externalId) {
     res.status(400).json({
       success: false,
       message: 'Missing request data',
@@ -238,20 +241,24 @@ exports.delete_single_task = async (req, res) => {
       let tokenValid = await tokenMiddleware.checkToken(token);
       let userExists = await checkUserExists(uniqueId);
       if (tokenValid.success && userExists) {
-        Task.remove({ _id: taskId }, { new: true }, (err, task) => {
-          if (err) {
-            res.status(400).json({
-              success: false,
-              message: "Couldn't delete task",
-              data: err,
+        Task.deleteOne(
+          { externalId: externalId },
+          { new: true },
+          (err, task) => {
+            if (err) {
+              res.status(400).json({
+                success: false,
+                message: "Couldn't delete task",
+                data: err,
+              });
+            }
+            res.status(200).json({
+              success: true,
+              message: 'Task deleted successfully',
+              data: task,
             });
           }
-          res.status(200).json({
-            success: true,
-            message: 'Task deleted successfully',
-            data: task,
-          });
-        });
+        );
       } else {
         res.status(400).json({
           success: false,
