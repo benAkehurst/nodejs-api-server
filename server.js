@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
 const winston = require('./config/winston');
+const helmet = require('helmet');
 
 // Models Imports
 const User = require('./api/models/userModel');
@@ -46,6 +47,7 @@ mongoose.connect(
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(morgan('combined', { stream: winston.stream }));
+app.use(helmet());
 
 // Cors Controls
 app.use((req, res, next) => {

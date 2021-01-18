@@ -19,11 +19,12 @@ const Code = require('../models/codeModel');
  * POST:
  * {
  *  "email": "",
- *  "password": ""
+ *  "password": "",
+ *  "rememberMe": boolean
  * }
  */
 exports.login_user = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, rememberMe } = req.body;
   if (!email || !password) {
     res.status(400).json({
       success: false,
@@ -48,13 +49,19 @@ exports.login_user = async (req, res) => {
             data: err,
           });
         } else {
-          let token = jwt.sign({ username: user._id }, process.env.JWT_SECRET, {
-            // TODO: SET JWT TOKEN DURATION HERE
-            expiresIn: '24h',
-          });
+          let token = jwt.sign(
+            { username: user.uniqueId },
+            process.env.JWT_SECRET,
+            {
+              // TODO: SET JWT TOKEN DURATION HERE
+              expiresIn: rememberMe ? '48h' : '1h',
+            }
+          );
           let userFiltered = _.pick(user.toObject(), ['firstName', 'uniqueId']);
           userFiltered.token = token;
-          res.cookie('token', token, { expiresIn: '24h' });
+          res.cookie('session', token, {
+            expiresIn: rememberMe ? '48h' : '1h',
+          });
           res.status(200).json({
             success: true,
             message: 'Successfully logged in',
@@ -149,15 +156,20 @@ exports.create_new_user = async (req, res) => {
         firstName: firstName ? firstName : '',
         lastName: lastName ? lastName : '',
         email: email,
-        password: bcrypt.hashSync(req.body.password, 10),
+        password: bcrypt.hashSync(req.body.password, 14),
         acceptedTerms: true,
         createdOnDate: format(new Date(), 'dd/MM/yyyy'),
         uniqueId: uuidv4(),
       });
       const user = await newUser.save();
-      const token = jwt.sign({ username: user._id }, process.env.JWT_SECRET, {
-        expiresIn: '24h',
-      });
+      const token = jwt.sign(
+        { username: user.uniqueId },
+        process.env.JWT_SECRET,
+        {
+          // TODO: SET JWT TOKEN DURATION HERE
+          expiresIn: '24h',
+        }
+      );
       const baseUrl = req.protocol + '://' + req.get('host');
       const secretCode = cryptoRandomString({
         length: 6,
@@ -171,7 +183,7 @@ exports.create_new_user = async (req, res) => {
         from: `YOUR NAME <${process.env.EMAIL_USERNAME}>`,
         to: user.email,
         subject: 'Your Activation Link for YOUR APP',
-        text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user._id}/${secretCode}`,
+        text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user.uniqueId}/${secretCode}`,
         html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/v1/auth/verification/verify-account/${user.uniqueId}/${secretCode}" target="_blank">Email Verification Link</a></strong></p>`,
       };
       await sendEmail(data);
