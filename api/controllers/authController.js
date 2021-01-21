@@ -13,6 +13,7 @@ const { checkToken } = require('../../middlewares/token');
 const { sendEmail } = require('../../middlewares/utils/emailService');
 const User = require('../models/userModel');
 const Code = require('../models/codeModel');
+const Task = require('../models/taskModel');
 
 /**
  * Logs a user in
@@ -62,6 +63,8 @@ exports.login_user = async (req, res) => {
           res.cookie('session', token, {
             expiresIn: rememberMe ? '48h' : '1h',
           });
+          let tasks = await Task.find({ user: user.uniqueId });
+          userFiltered.tasks = tasks;
           res.status(200).json({
             success: true,
             message: 'Successfully logged in',
@@ -190,7 +193,7 @@ exports.create_new_user = async (req, res) => {
       res.status(201).json({
         success: true,
         message: 'User created',
-        data: { uniqueId: user.uniqueId, token: token },
+        data: { uniqueId: user.uniqueId, token: token, tasks: null },
       });
     } catch {
       res.status(400).json({
