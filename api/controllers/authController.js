@@ -190,7 +190,7 @@ exports.create_new_user = async (req, res) => {
       res.status(201).json({
         success: true,
         message: 'User created',
-        data: { userId: user.uniqueId, token: token },
+        data: { uniqueId: user.uniqueId, token: token },
       });
     } catch {
       res.status(400).json({
